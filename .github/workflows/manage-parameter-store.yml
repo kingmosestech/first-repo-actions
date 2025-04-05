@@ -13,7 +13,6 @@ on:
           - create
           - update
           - delete
-          - get
       parameter_name:
         description: "Parameter name"
         type: string
@@ -34,13 +33,43 @@ on:
 
 jobs:
   build:
-    environment: dev  # Move this line up to the job level
-    uses: kingmosestech/first-repo-actions/.github/workflows/parameter-store-shared.yml@main
-    with:
-      action: ${{ github.event.inputs.action }}
-      parameter_name: ${{ github.event.inputs.parameter_name }}
-      parameter_value: ${{ github.event.inputs.parameter_value }}
-      parameter_type: ${{ github.event.inputs.parameter_type }}
-    secrets:
-      role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-      aws-region: ${{ secrets.AWS_REGION }
+    environment: dev
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      
+      - name: List Parameters
+        if: ${{ github.event.inputs.action == 'list' }}
+        run: |
+          aws ssm describe-parameters --output json
+      
+      - name: Create Parameter
+        if: ${{ github.event.inputs.action == 'create' }}
+        run: |
+          aws ssm put-parameter \
+            --name "${{ github.event.inputs.parameter_name }}" \
+            --value "${{ github.event.inputs.parameter_value }}" \
+            --type "${{ github.event.inputs.parameter_type }}" \
+            --no-overwrite
+
+      - name: Update Parameter
+        if: ${{ github.event.inputs.action == 'update' }}
+        run: |
+          aws ssm put-parameter \
+            --name "${{ github.event.inputs.parameter_name }}" \
+            --value "${{ github.event.inputs.parameter_value }}" \
+            --type "${{ github.event.inputs.parameter_type }}" \
+            --overwrite
+
+      - name: Delete Parameter
+        if: ${{ github.event.inputs.action == 'delete' }}
+        run: |
+          aws ssm delete-parameter --name "${{ github.event.inputs.parameter_name }}"

@@ -33,8 +33,8 @@ on:
           - StringList
 
 jobs:
-  manage-parameters:
-    uses: ./.github/workflows/parameter-store-shared.yml@main
+  build:
+    uses: https://github.com/kingmosestech/first-repo-actions/blob/main/.github/workflows/parameter-store-shared.yml@main
     with:
       action: ${{ github.event.inputs.action }}
       parameter_name: ${{ github.event.inputs.parameter_name }}

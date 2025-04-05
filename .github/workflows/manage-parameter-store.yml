@@ -1,0 +1,45 @@
+name: Manage AWS Parameter Store
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "Action"
+        required: true
+        default: list
+        type: choice
+        options:
+          - list
+          - create
+          - update
+          - delete
+          - get
+      parameter_name:
+        description: "Parameter name"
+        type: string
+        required: false
+      parameter_value:
+        description: "Parameter value"
+        type: string
+        required: false
+      parameter_type:
+        description: "Parameter type"
+        type: choice
+        required: false
+        default: String
+        options:
+          - String
+          - SecureString
+          - StringList
+
+jobs:
+  manage-parameters:
+    uses: ./.github/workflows/parameter-store-shared.yml
+    with:
+      action: ${{ github.event.inputs.action }}
+      parameter_name: ${{ github.event.inputs.parameter_name }}
+      parameter_value: ${{ github.event.inputs.parameter_value }}
+      parameter_type: ${{ github.event.inputs.parameter_type }}
+    secrets:
+      role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+      aws-region: ${{ secrets.AWS_REGION }}

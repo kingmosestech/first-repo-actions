@@ -1,0 +1,77 @@
+name: AWS Parameter Store Shared Workflow
+
+on:
+  workflow_call:
+    inputs:
+      action:
+        required: true
+        type: string
+      parameter_name:
+        required: false
+        type: string
+      parameter_value:
+        required: false
+        type: string
+      parameter_type:
+        required: false
+        type: string
+        default: "String"
+    secrets:
+      role-to-assume:
+        required: true
+      aws-region:
+        required: true
+
+jobs:
+  process:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    
+    steps:
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.role-to-assume }}
+          aws-region: ${{ secrets.aws-region }}
+      
+      - name: List Parameters
+        if: ${{ inputs.action == 'list' }}
+        run: |
+          aws ssm describe-parameters --output json
+      
+      - name: Create Parameter
+        if: ${{ inputs.action == 'create' }}
+        run: |
+          aws ssm put-parameter \
+            --name "${{ inputs.parameter_name }}" \
+            --value "${{ inputs.parameter_value }}" \
+            --type "${{ inputs.parameter_type }}" \
+            --no-overwrite
+
+      - name: Update Parameter
+        if: ${{ inputs.action == 'update' }}
+        run: |
+          aws ssm put-parameter \
+            --name "${{ inputs.parameter_name }}" \
+            --value "${{ inputs.parameter_value }}" \
+            --type "${{ inputs.parameter_type }}" \
+            --overwrite
+
+      - name: Delete Parameter
+        if: ${{ inputs.action == 'delete' }}
+        run: |
+          aws ssm delete-parameter --name "${{ inputs.parameter_name }}"
+
+      - name: Get Parameter
+        if: ${{ inputs.action == 'get' }}
+        run: |
+          if [[ "${{ inputs.parameter_type }}" == "SecureString" ]]; then
+            aws ssm get-parameter \
+              --name "${{ inputs.parameter_name }}" \
+              --with-decryption
+          else
+            aws ssm get-parameter \
+              --name "${{ inputs.parameter_name }}"
+          fi

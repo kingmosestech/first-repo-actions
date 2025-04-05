@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           role-to-assume: ${{ secrets.role-to-assume }}
-          aws-region:  ${{ vars.AWS_REGION }}
+          aws-region:  ${{ secrets.AWS_REGION }}
       
       - name: List Parameters
         if: ${{ inputs.action == 'list' }}

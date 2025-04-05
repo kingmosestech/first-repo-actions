@@ -20,7 +20,7 @@ on:
       role-to-assume:
         required: true
       aws-region:
-        required: true
+        required: false
 
 jobs:
   process:

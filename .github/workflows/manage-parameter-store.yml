@@ -34,6 +34,7 @@ on:
 
 jobs:
   build:
+    environment: dev  # Move this line up to the job level
     uses: kingmosestech/first-repo-actions/.github/workflows/parameter-store-shared.yml@main
     with:
       action: ${{ github.event.inputs.action }}
@@ -41,6 +42,5 @@ jobs:
       parameter_value: ${{ github.event.inputs.parameter_value }}
       parameter_type: ${{ github.event.inputs.parameter_type }}
     secrets:
-      environment: dev
       role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-      aws-region: ${{ secrets.AWS_REGION }}
+      aws-region: ${{ secrets.AWS_REGION }

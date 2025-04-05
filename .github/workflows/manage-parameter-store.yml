@@ -34,7 +34,7 @@ on:
 
 jobs:
   manage-parameters:
-    uses: ./.github/workflows/parameter-store-shared.yml
+    uses: kingmosestech/first-repo-actions/.github/workflows/parameter-store-shared.yml@main
     with:
       action: ${{ github.event.inputs.action }}
       parameter_name: ${{ github.event.inputs.parameter_name }}
